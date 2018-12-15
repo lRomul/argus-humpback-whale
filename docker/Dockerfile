@@ -29,6 +29,8 @@ RUN conda install -c conda-forge opencv \
     matplotlib \
     tqdm
 
+RUN pip install PyTurboJPEG
+
 ENV PYTHONPATH $PYTHONPATH:/workdir
 ENV TORCH_HOME=/workdir/data/.torch
 

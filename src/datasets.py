@@ -29,10 +29,12 @@ def get_samples(train_val_cvs_path, train):
 
 class WhaleDataset(Dataset):
     def __init__(self, train_val_cvs_path, train,
+                 bbox_transform=None,
                  image_transform=None):
         super().__init__()
         self.train_folds_path = train_val_cvs_path
         self.train = train
+        self.bbox_transform = bbox_transform
         self.image_transform = image_transform
         self.turbo_jpeg = TurboJPEG('/usr/lib/x86_64-linux-gnu/libturbojpeg.so.0')
 
@@ -44,13 +46,17 @@ class WhaleDataset(Dataset):
 
     def __getitem__(self, idx):
         image = self.images[idx]
-        image = self.turbo_jpeg.decode(image)
         class_index = self.class_indexes[idx]
         bbox = self.bboxes[idx]
+
+        image = self.turbo_jpeg.decode(image)
+
+        if self.bbox_transform is not None:
+            image = self.bbox_transform(image, bbox)
 
         if self.image_transform is not None:
             image = self.image_transform(image)
 
         class_index = torch.tensor(class_index)
 
-        return image, class_index, bbox
+        return image, class_index
