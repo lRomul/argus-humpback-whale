@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
          ca-certificates \
          libjpeg-dev \
          libpng-dev \
+         libturbojpeg \
          libgl1-mesa-glx &&\
      rm -rf /var/lib/apt/lists/*
 
@@ -24,7 +25,9 @@ RUN conda install pytorch torchvision cuda100 -c pytorch
 
 RUN conda install -c conda-forge opencv \
     jupyter \
-    pandas
+    pandas \
+    matplotlib \
+    tqdm
 
 ENV PYTHONPATH $PYTHONPATH:/workdir
 ENV TORCH_HOME=/workdir/data/.torch
