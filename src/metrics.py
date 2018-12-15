@@ -63,12 +63,13 @@ def mapk(actual, predicted, k=3):
 
 
 class MAPatK(Metric):
-    name = 'map_at_k'
+    name = 'map_at_{k}'
     better = 'max'
 
-    def __init__(self, k=3):
+    def __init__(self, k=5):
         super().__init__()
         self.k = k
+        self.name = self.name.format(k=k)
         self.scores = []
 
     def reset(self):

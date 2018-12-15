@@ -15,7 +15,7 @@ experiment_name = 'test_001'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (208, 656)
-num_workers = 4
+num_workers = 8
 batch_size = 32
 
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
             'pretrained': True,
             'dropout_p': 0.2
         },
-        'optimizer': ('Adam', {'lr': 0.001}),
+        'optimizer': ('Adam', {'lr': 0.0001}),
         'loss': 'CrossEntropyLoss',
         'device': 'cuda'
     }
