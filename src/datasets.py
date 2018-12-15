@@ -17,14 +17,20 @@ def get_samples(train_val_cvs_path, train):
     images = []
     class_indexes = []
     bboxes = []
+    id2class = dict()
 
     for i, row in tqdm.tqdm(data_df.iterrows(), total=len(data_df)):
         image = open(row.image_path, 'rb').read()
         images.append(image)
         class_indexes.append(row.class_index)
         bboxes.append((row.x0, row.y0, row.x1, row.y1))
+        if row.Id in id2class:
+            if id2class[row.Id] != row.class_index:
+                raise Exception("Two different class index for one id")
+        else:
+            id2class[row.Id] = row.class_index
 
-    return images, class_indexes, bboxes
+    return images, class_indexes, bboxes, id2class
 
 
 class WhaleDataset(Dataset):
@@ -38,7 +44,7 @@ class WhaleDataset(Dataset):
         self.image_transform = image_transform
         self.turbo_jpeg = TurboJPEG('/usr/lib/x86_64-linux-gnu/libturbojpeg.so.0')
 
-        self.images, self.class_indexes, self.bboxes = \
+        self.images, self.class_indexes, self.bboxes, self.id2class = \
             get_samples(train_val_cvs_path, train)
 
     def __len__(self):
