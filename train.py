@@ -37,7 +37,7 @@ if __name__ == "__main__":
             'pretrained': True,
             'dropout_p': 0.2
         },
-        'optimizer': ('Adam', {'lr': 0.0001}),
+        'optimizer': ('Adam', {'lr': 0.00005}),
         'loss': 'CrossEntropyLoss',
         'device': 'cuda'
     }
