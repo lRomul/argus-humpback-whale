@@ -21,6 +21,36 @@ def gauss_noise(image, sigma_sq):
     return image
 
 
+def image_rotate_crop(image, center, theta, height, width):
+    '''Subsample an image by rotated rectangle
+    Args:
+        image (inp.ndarray: np.uint8): Original input RGB img to subsample
+        center (tuple of ints): The rectangle center point position
+        theta (float): The rectangle rotation angle in deg
+        height (int): Height of the rectangle in px
+        width (int): Width of the rectangle in px
+    Returns:
+        (inp.ndarray: np.uint8): rotated crop of the image
+    '''
+    theta *= np.pi / 180  # convert to rad
+
+    v_x = (np.cos(theta), np.sin(theta))
+    v_y = (-np.sin(theta), np.cos(theta))
+    dw = (width - 1) / 2
+    dh = (height - 1) / 2
+    s_x = center[0] - v_x[0] * dw - v_y[0] * dh
+    s_y = center[1] - v_x[1] * dw - v_y[1] * dh
+
+    mapping = np.array([[v_x[0], v_y[0], s_x],
+                        [v_x[1], v_y[1], s_y]])
+
+    return cv2.warpAffine(image,
+                          mapping,
+                          (width, height),
+                          flags=cv2.WARP_INVERSE_MAP,
+                          borderMode=cv2.BORDER_REPLICATE)
+
+
 class Compose:
     def __init__(self, transforms):
         self.transforms = transforms
@@ -41,16 +71,43 @@ class UseWithProb:
         self.transform = transform
         self.prob = prob
 
-    def __call__(self, image):
-        if random.random() < self.prob:
-            image = self.transform(image)
-        return image
+    def __call__(self, image, bbox=None):
+        if bbox is None:
+            if random.random() < self.prob:
+                image = self.transform(image)
+            return image
+        else:
+            if random.random() < self.prob:
+                image, bbox = self.transform(image, bbox)
+            return image, bbox
 
 
 class ImageBboxCrop:
     def __call__(self, image, bbox):
         image = image_crop(image, bbox)
-        return image
+        return image, bbox
+
+
+class RandomRotateCrop:
+    def __init__(self, angles=(0, 0), center_shift=(0, 0), length_shift=(0, 0)):
+        self.angles = angles
+        self.center_shift = center_shift
+        self.length_shift = length_shift
+
+    def __call__(self, image, bbox):
+        length_shift = 1 + random.uniform(*self.length_shift)
+        width = int((bbox[2] - bbox[0]) * length_shift)
+        height = int((bbox[3] - bbox[1]) * length_shift)
+
+        x_center = (bbox[2] + bbox[0]) / 2
+        y_center = (bbox[3] + bbox[1]) / 2
+        x_center += width * random.uniform(*self.center_shift)
+        y_center += height * random.uniform(*self.center_shift)
+        center = int(x_center), int(y_center)
+
+        angle = random.randint(*self.angles)
+        image = image_rotate_crop(image, center, angle, height, width)
+        return image, bbox
 
 
 class Scale:
@@ -184,8 +241,6 @@ class ImageToTensor:
 def get_transforms(train, size):
     transforms_dict = dict()
 
-    transforms_dict['bbox_transform'] = ImageBboxCrop()
-
     if train:
         image_transforms = [
             Scale(size),
@@ -199,10 +254,15 @@ def get_transforms(train, size):
             UseWithProb(RandomGaussianBlur(), 0.25),
             ImageToTensor()
         ]
+        bbox_transform = RandomRotateCrop((-12, 12),
+                                          (-0.05, 0.05),
+                                          (-0.03, 0.2))
     else:
         image_transforms = [
             Scale(size),
             ImageToTensor()
         ]
+        bbox_transform = ImageBboxCrop()
+    transforms_dict['bbox_transform'] = bbox_transform
     transforms_dict['image_transform'] = Compose(image_transforms)
     return transforms_dict

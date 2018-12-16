@@ -1,7 +1,6 @@
-import torch
 import numpy as np
 
-from argus.metrics import Metric
+from argus.metrics.metric import Metric, METRIC_REGISTRY
 
 
 def apk(actual, predicted, k=3):
@@ -70,6 +69,7 @@ class MAPatK(Metric):
         super().__init__()
         self.k = k
         self.name = self.name.format(k=k)
+        METRIC_REGISTRY[self.name] = self.__class__
         self.scores = []
 
     def reset(self):

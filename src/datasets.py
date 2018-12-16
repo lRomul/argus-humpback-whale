@@ -58,7 +58,7 @@ class WhaleDataset(Dataset):
         image = self.turbo_jpeg.decode(image)
 
         if self.bbox_transform is not None:
-            image = self.bbox_transform(image, bbox)
+            image, bbox = self.bbox_transform(image, bbox)
 
         if self.image_transform is not None:
             image = self.image_transform(image)

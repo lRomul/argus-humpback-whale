@@ -11,7 +11,7 @@ from src.metrics import MAPatK
 from src import config
 
 
-experiment_name = 'test_001'
+experiment_name = 'resnet50_001'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (208, 656)
@@ -43,10 +43,12 @@ if __name__ == "__main__":
     }
     model = CnnFinetune(params)
 
+    monitor_metric = MAPatK(k=5)
+    monitor_metric_name = 'val_' + monitor_metric.name
     callbacks = [
-        MonitorCheckpoint(experiment_dir, monitor='val_loss', max_saves=3),
-        EarlyStopping(monitor='val_loss', patience=50),
-        ReduceLROnPlateau(monitor='val_loss', factor=0.64, patience=5),
+        MonitorCheckpoint(experiment_dir, monitor=monitor_metric_name, max_saves=3),
+        EarlyStopping(monitor=monitor_metric_name, patience=100),
+        ReduceLROnPlateau(monitor=monitor_metric_name, patience=30, factor=0.64, min_lr=1e-8),
         LoggingToFile(join(experiment_dir, 'log.txt'))
     ]
 
@@ -54,4 +56,4 @@ if __name__ == "__main__":
               val_loader=val_loader,
               max_epochs=1000,
               callbacks=callbacks,
-              metrics=['accuracy', MAPatK(k=5)])
+              metrics=['accuracy', monitor_metric])
