@@ -11,7 +11,7 @@ from src.metrics import MAPatK
 from src import config
 
 
-experiment_name = 'resnet50_001'
+experiment_name = 'new_resnet50_001'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (208, 656)

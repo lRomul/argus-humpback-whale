@@ -12,7 +12,6 @@ def get_samples(train_val_cvs_path, train):
         data_df = data_df[~data_df.val]
     else:
         data_df = data_df[data_df.val]
-        data_df = data_df[data_df.class_index != -1]
 
     images = []
     class_indexes = []

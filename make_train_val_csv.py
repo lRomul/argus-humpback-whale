@@ -8,14 +8,15 @@ from src import config
 
 def make_train_val_df(train_csv_path, bbox_csv_path, train_dir, val_proportion):
     data_df = pd.read_csv(train_csv_path)
-    data_df = data_df[data_df.Id != 'new_whale']
     data_df['val'] = np.random.random(size=data_df.shape[0]) < val_proportion
     val_df = data_df[data_df.val].copy()
     train_df = data_df[~data_df.val].copy()
 
-    id2class = {train_id: cls for cls, train_id in enumerate(set(train_df.Id))}
+    train_without_new_df = train_df[train_df.Id != 'new_whale']
+    id2class = {train_id: cls for cls, train_id in enumerate(set(train_without_new_df.Id), 1)}
+    id2class['new_whale'] = 0
     train_df['class_index'] = train_df.Id.map(lambda x: id2class[x])
-    val_df['class_index'] = val_df.Id.map(lambda x: id2class[x] if x in id2class else -1)
+    val_df['class_index'] = val_df.Id.map(lambda x: id2class[x] if x in id2class else 0)
 
     train_val_df = pd.concat([val_df, train_df])
     train_val_df['image_path'] = train_val_df.Image.map(
