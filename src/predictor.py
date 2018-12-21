@@ -4,8 +4,8 @@ from argus import load_model
 
 
 class Predictor:
-    def __init__(self, model_path, bbox_transform, image_transform):
-        self.model = load_model(model_path)
+    def __init__(self, model_path, bbox_transform, image_transform, device=None):
+        self.model = load_model(model_path, device)
         self.model.nn_module.eval()
 
         self.bbox_transform = bbox_transform

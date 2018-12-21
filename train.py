@@ -11,10 +11,10 @@ from src.metrics import MAPatK
 from src import config
 
 
-experiment_name = 'resnet50_001'
+experiment_name = 'resnet50_002'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
-image_size = (208, 656)
+image_size = (176, 560)
 num_workers = 8
 batch_size = 32
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
             'pretrained': True,
             'dropout_p': 0.2
         },
-        'optimizer': ('Adam', {'lr': 0.00005}),
+        'optimizer': ('Adam', {'lr': 0.00003}),
         'loss': 'CrossEntropyLoss',
         'device': 'cuda'
     }
@@ -46,9 +46,9 @@ if __name__ == "__main__":
     monitor_metric = MAPatK(k=5)
     monitor_metric_name = 'val_' + monitor_metric.name
     callbacks = [
-        MonitorCheckpoint(experiment_dir, monitor=monitor_metric_name, max_saves=3),
-        EarlyStopping(monitor=monitor_metric_name, patience=100),
-        ReduceLROnPlateau(monitor=monitor_metric_name, patience=30, factor=0.64, min_lr=1e-8),
+        MonitorCheckpoint(experiment_dir, monitor=monitor_metric_name),
+        EarlyStopping(monitor=monitor_metric_name, patience=30),
+        ReduceLROnPlateau(monitor=monitor_metric_name, patience=7, factor=0.64, min_lr=1e-8),
         LoggingToFile(join(experiment_dir, 'log.txt'))
     ]
 
