@@ -8,5 +8,5 @@ TEST_DIR = join(DATA_DIR, 'test')
 BOUNDING_BOXES_CSV = join(DATA_DIR, 'bounding_boxes.csv')
 EXPERIMENTS_DIR = join(DATA_DIR, 'experiments')
 
-VAL_PROPORTION = 0.01
+VAL_PROPORTION = 0.1
 TRAIN_VAL_CSV_PATH = join(DATA_DIR, 'train_val.csv')

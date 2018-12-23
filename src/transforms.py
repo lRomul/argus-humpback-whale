@@ -82,6 +82,20 @@ class UseWithProb:
             return image, bbox
 
 
+class OneOf:
+    def __init__(self, transforms):
+        self.transforms = transforms
+
+    def __call__(self, image, bbox=None):
+        transform = np.random.choice(self.transforms)
+        if bbox is None:
+            image = transform(image)
+            return image
+        else:
+            image, bbox = transform(image, bbox)
+            return image, bbox
+
+
 class ImageBboxCrop:
     def __call__(self, image, bbox):
         image = image_crop(image, bbox)
@@ -254,9 +268,10 @@ def get_transforms(train, size):
             UseWithProb(RandomGaussianBlur(), 0.2),
             ImageToTensor()
         ]
-        bbox_transform = RandomRotateCrop((-12, 12),
-                                          (-0.05, 0.05),
-                                          (-0.03, 0.2))
+        bbox_transform = OneOf([
+            RandomRotateCrop((-12, 12), (-0.05, 0.05), (-0.03, 0.2)),
+            ImageBboxCrop()
+        ])
     else:
         image_transforms = [
             Scale(size),

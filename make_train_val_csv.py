@@ -9,9 +9,15 @@ from src import config
 def make_train_val_df(train_csv_path, bbox_csv_path, train_dir, val_proportion):
     data_df = pd.read_csv(train_csv_path)
     data_df = data_df[data_df.Id != 'new_whale']
-    data_df['val'] = np.random.random(size=data_df.shape[0]) < val_proportion
+    id_counts = dict(data_df.Id.value_counts())
+    data_df['id_counts'] = data_df.Id.map(lambda x: id_counts[x])
+
+    data_df['val'] = (np.random.random(size=data_df.shape[0]) < val_proportion) \
+                     & (data_df['id_counts'] > 2)
     val_df = data_df[data_df.val].copy()
     train_df = data_df[~data_df.val].copy()
+
+    assert set(data_df.Id) == set(train_df.Id)
 
     id2class = {train_id: cls for cls, train_id in enumerate(set(train_df.Id))}
     train_df['class_index'] = train_df.Id.map(lambda x: id2class[x])
