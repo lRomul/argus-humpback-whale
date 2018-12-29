@@ -11,13 +11,13 @@ from src.metrics import MAPatK
 from src import config
 
 
-experiment_name = 'resnet50_003'
+experiment_name = 'resnet50_005'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (176, 560)
 num_workers = 8
 batch_size = 32
-balance_coef = 0.9
+balance_coef = 0.0
 train_epoch_size = 20000
 
 
@@ -56,6 +56,9 @@ if __name__ == "__main__":
         ReduceLROnPlateau(monitor=monitor_metric_name, patience=15, factor=0.64, min_lr=1e-8),
         LoggingToFile(join(experiment_dir, 'log.txt'))
     ]
+
+    with open(join(experiment_dir, 'source.py'), 'w') as outfile:
+        outfile.write(open(__file__).read())
 
     model.fit(train_loader,
               val_loader=val_loader,
