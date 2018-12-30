@@ -11,12 +11,12 @@ from src.metrics import MAPatK
 from src import config
 
 
-experiment_name = 'arcface_resnet50_001'
+experiment_name = 'arcface_resnet50_002'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
-image_size = (176, 560)
+image_size = (96, 304)
 num_workers = 8
-batch_size = 32
+batch_size = 64
 balance_coef = 0.0
 train_epoch_size = 20000
 
@@ -40,15 +40,19 @@ if __name__ == "__main__":
                 'model_name': 'resnet50',
                 'num_classes': len(train_dataset.id2class_idx),
                 'pretrained': True,
-                'dropout_p': 0.2
+                'dropout_p': 0.0
             },
             'arcface': {
-                's': 64.0,
-                'm': 0.5
+                's': 32.0,
+                'm': 0.5,
+                'easy_margin': False
             }
         },
-        'optimizer': ('SGD', {'lr': 0.0001}),
-        'loss': 'CrossEntropyLoss',
+        'optimizer': ('SGD', {'lr': 0.01}),
+        'loss': ('FocalLoss', {
+            'gamma': 2,
+            'eps': 1e-7
+        }),
         'device': 'cuda'
     }
     print("Model params:", params)
@@ -58,8 +62,8 @@ if __name__ == "__main__":
     monitor_metric_name = 'val_' + monitor_metric.name
     callbacks = [
         MonitorCheckpoint(experiment_dir, monitor=monitor_metric_name),
-        EarlyStopping(monitor=monitor_metric_name, patience=60),
-        ReduceLROnPlateau(monitor=monitor_metric_name, patience=15, factor=0.64, min_lr=1e-8),
+        EarlyStopping(monitor=monitor_metric_name, patience=120),
+        ReduceLROnPlateau(monitor=monitor_metric_name, patience=30, factor=0.64, min_lr=1e-8),
         LoggingToFile(join(experiment_dir, 'log.txt'))
     ]
 

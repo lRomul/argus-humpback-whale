@@ -6,6 +6,7 @@ from argus import Model
 from argus.utils import to_device, detach_tensors
 
 from src.arcface import ArcfaceModel
+from src.focal_loss import FocalLoss
 
 
 class CnnFinetune(Model):
@@ -14,6 +15,9 @@ class CnnFinetune(Model):
 
 class ArcfaceModel(Model):
     nn_module = ArcfaceModel
+    loss = {
+        'FocalLoss': FocalLoss
+    }
 
     def prepare_batch(self, batch, device):
         inp, trg = batch
