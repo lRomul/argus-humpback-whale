@@ -6,12 +6,12 @@ from argus.callbacks import MonitorCheckpoint, EarlyStopping,\
 
 from src.transforms import get_transforms
 from src.datasets import WhaleDataset, RandomWhaleDataset
-from src.argus_models import CnnFinetune
+from src.argus_models import ArcfaceModel
 from src.metrics import MAPatK
 from src import config
 
 
-experiment_name = 'resnet50_005'
+experiment_name = 'arcface_resnet50_001'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (176, 560)
@@ -36,17 +36,23 @@ if __name__ == "__main__":
 
     params = {
         'nn_module': {
-            'model_name': 'resnet50',
-            'num_classes': len(train_dataset.id2class_idx),
-            'pretrained': True,
-            'dropout_p': 0.2
+            'cnn_finetune': {
+                'model_name': 'resnet50',
+                'num_classes': len(train_dataset.id2class_idx),
+                'pretrained': True,
+                'dropout_p': 0.2
+            },
+            'arcface': {
+                's': 64.0,
+                'm': 0.5
+            }
         },
-        'optimizer': ('Adam', {'lr': 0.00003}),
+        'optimizer': ('SGD', {'lr': 0.0001}),
         'loss': 'CrossEntropyLoss',
         'device': 'cuda'
     }
     print("Model params:", params)
-    model = CnnFinetune(params)
+    model = ArcfaceModel(params)
 
     monitor_metric = MAPatK(k=5)
     monitor_metric_name = 'val_' + monitor_metric.name
