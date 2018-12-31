@@ -31,7 +31,8 @@ RUN conda install -c conda-forge opencv \
 
 RUN pip install PyTurboJPEG \
     pytorch-argus==0.0.7 \
-    cnn-finetune==0.5.1
+    cnn-finetune==0.5.1 \
+    scikit-learn==0.20.2
 
 ENV PYTHONPATH $PYTHONPATH:/workdir
 ENV TORCH_HOME=/workdir/data/.torch
