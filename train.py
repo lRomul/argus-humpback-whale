@@ -11,12 +11,12 @@ from src.metrics import MAPatK
 from src import config
 
 
-experiment_name = 'arcface_resnet50_002'
+experiment_name = 'arcface_resnet50_004'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (96, 304)
 num_workers = 8
-batch_size = 64
+batch_size = 128
 balance_coef = 0.0
 train_epoch_size = 20000
 
@@ -40,13 +40,14 @@ if __name__ == "__main__":
                 'model_name': 'resnet50',
                 'num_classes': len(train_dataset.id2class_idx),
                 'pretrained': True,
-                'dropout_p': 0.0
+                'dropout_p': 0.5
             },
             'arcface': {
                 's': 32.0,
                 'm': 0.5,
                 'easy_margin': False
-            }
+            },
+            'embedding_size': 512
         },
         'optimizer': ('SGD', {'lr': 0.01}),
         'loss': ('FocalLoss', {

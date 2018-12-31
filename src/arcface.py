@@ -54,16 +54,21 @@ class ArcMarginProduct(nn.Module):
 
 
 class ArcfaceModel(nn.Module):
-    def __init__(self, cnn_finetune, arcface):
+    def __init__(self, cnn_finetune, arcface, embedding_size):
         super().__init__()
         num_classes = cnn_finetune['num_classes']
         cnn_finetune = make_model(**cnn_finetune)
         self.features = cnn_finetune._features
         self.pool = cnn_finetune.pool
-        # self.dropout = cnn_finetune.dropout
+        self.dropout = cnn_finetune.dropout
 
         in_features = cnn_finetune._classifier.in_features
-        self.arcface = ArcMarginProduct(in_features=in_features,
+        self.fc_1 = nn.Linear(in_features, 1024)
+        self.fc_2 = nn.Linear(1024, embedding_size)
+        self.relu = nn.ReLU(inplace=True)
+        self.bn = nn.BatchNorm1d(embedding_size)
+
+        self.arcface = ArcMarginProduct(in_features=embedding_size,
                                         out_features=num_classes,
                                         **arcface)
 
@@ -72,4 +77,11 @@ class ArcfaceModel(nn.Module):
         if self.pool is not None:
             x = self.pool(x)
         x = x.view(x.size(0), -1)
+
+        x = self.fc_1(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+
+        x = self.fc_2(x)
+        x = self.bn(x)
         return x
