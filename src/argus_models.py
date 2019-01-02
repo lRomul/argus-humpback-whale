@@ -16,7 +16,8 @@ class CnnFinetune(Model):
 class ArcfaceModel(Model):
     nn_module = ArcfaceModel
     loss = {
-        'FocalLoss': FocalLoss
+        'FocalLoss': FocalLoss,
+        'CrossEntropyLoss': torch.nn.CrossEntropyLoss
     }
 
     def prepare_batch(self, batch, device):

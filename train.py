@@ -11,7 +11,7 @@ from src.metrics import CosMAPatK
 from src import config
 
 
-experiment_name = 'arcface_resnet50_007'
+experiment_name = 'arcface_resnet50_010'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (96, 304)
@@ -50,10 +50,7 @@ if __name__ == "__main__":
             'embedding_size': 512
         },
         'optimizer': ('Adam', {'lr': 0.0001}),
-        'loss': ('FocalLoss', {
-            'gamma': 2,
-            'eps': 1e-7
-        }),
+        'loss': 'CrossEntropyLoss',
         'device': 'cuda'
     }
     print("Model params:", params)
