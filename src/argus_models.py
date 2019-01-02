@@ -36,8 +36,10 @@ class ArcfaceModel(Model):
 
         prediction = detach_tensors(prediction)
         target = detach_tensors(target)
+        embeddings = detach_tensors(embeddings)
         return {
             'prediction': self.prediction_transform(prediction),
+            'embeddings': embeddings,
             'target': target,
             'loss': loss.item()
         }
@@ -52,6 +54,7 @@ class ArcfaceModel(Model):
             loss = self.loss(prediction, target)
             return {
                 'prediction': self.prediction_transform(prediction),
+                'embeddings': embeddings,
                 'target': target,
                 'loss': loss.item()
             }

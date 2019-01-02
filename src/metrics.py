@@ -1,5 +1,10 @@
 import numpy as np
 
+import torch
+from torch.utils.data import DataLoader
+from sklearn.metrics.pairwise import cosine_distances
+
+from argus.engine import State
 from argus.metrics.metric import Metric, METRIC_REGISTRY
 
 
@@ -86,3 +91,64 @@ class MAPatK(Metric):
 
     def compute(self):
         return np.mean(self.scores)
+
+
+class CosMAPatK(Metric):
+    name = 'cos_map_at_{k}'
+    better = 'max'
+
+    def __init__(self, dataset, k=5, batch_size=32, num_workers=8):
+        super().__init__()
+        self.dataset = dataset
+        self.data_loader = DataLoader(dataset,
+                                      batch_size=batch_size,
+                                      num_workers=num_workers,
+                                      shuffle=False)
+        self.k = k
+        self.batch_size = batch_size
+        self.name = self.name.format(k=k)
+        METRIC_REGISTRY[self.name] = self.__class__
+        self.embeddings = []
+        self.class_indexes = []
+
+    def reset(self):
+        self.embeddings = []
+        self.class_indexes = []
+
+    def update(self, step_output: dict):
+        preds = step_output['embeddings'].cpu().numpy()
+        trgs = step_output['target'].cpu().numpy()
+
+        self.embeddings.append(preds)
+        self.class_indexes.append(trgs)
+
+    def epoch_complete(self, state: State, name_prefix=''):
+        val_embeds = np.concatenate(self.embeddings, axis=0)
+        val_cls_idx = np.concatenate(self.class_indexes, axis=0)
+
+        train_embeds = []
+        train_cls_idx = []
+        model = state.model
+        with torch.no_grad():
+            for input, target in self.data_loader:
+                input = input.to(model.device)
+                target = target.numpy()
+
+                embeds = model.nn_module(input).cpu().numpy()
+                train_embeds.append(embeds)
+                train_cls_idx.append(target)
+
+        train_embeds = np.concatenate(train_embeds, axis=0)
+        train_cls_idx = np.concatenate(train_cls_idx, axis=0)
+
+        print(val_embeds.shape, train_embeds.shape)
+
+        embeds_distance = cosine_distances(val_embeds, train_embeds)
+        preds_idx = embeds_distance.argsort(axis=1)
+        preds_idx = preds_idx[:, :self.k]
+
+        preds_idx = np.vectorize(lambda x: train_cls_idx[x])(preds_idx)
+
+        scores = [apk([a], p, self.k) for a, p in zip(val_cls_idx, preds_idx)]
+
+        state.metrics[name_prefix + self.name] = np.mean(scores)

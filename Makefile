@@ -3,7 +3,7 @@ CONT_NAME=--name=$(PROJECT_NAME)
 
 NET=--net=host
 IPC=--ipc=host
-VOLUMES=-v $(pwd)/..:/workdir
+VOLUMES=-v $(shell pwd):/workdir
 
 
 all: stop build run

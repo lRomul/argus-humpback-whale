@@ -7,18 +7,18 @@ from argus.callbacks import MonitorCheckpoint, EarlyStopping,\
 from src.transforms import get_transforms
 from src.datasets import WhaleDataset, RandomWhaleDataset
 from src.argus_models import ArcfaceModel
-from src.metrics import MAPatK
+from src.metrics import CosMAPatK
 from src import config
 
 
-experiment_name = 'arcface_resnet50_004'
+experiment_name = 'arcface_resnet50_006'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (96, 304)
 num_workers = 8
 batch_size = 128
 balance_coef = 0.0
-train_epoch_size = 20000
+train_epoch_size = 50000
 
 
 if __name__ == "__main__":
@@ -59,12 +59,14 @@ if __name__ == "__main__":
     print("Model params:", params)
     model = ArcfaceModel(params)
 
-    monitor_metric = MAPatK(k=5)
+    train_metric_dataset = WhaleDataset(train_val_csv_path, True, **val_transforms)
+    monitor_metric = CosMAPatK(train_metric_dataset, k=5,
+                               batch_size=batch_size, num_workers=num_workers)
     monitor_metric_name = 'val_' + monitor_metric.name
     callbacks = [
         MonitorCheckpoint(experiment_dir, monitor=monitor_metric_name),
-        EarlyStopping(monitor=monitor_metric_name, patience=120),
-        ReduceLROnPlateau(monitor=monitor_metric_name, patience=30, factor=0.64, min_lr=1e-8),
+        EarlyStopping(monitor=monitor_metric_name, patience=50),
+        ReduceLROnPlateau(monitor=monitor_metric_name, patience=10, factor=0.64, min_lr=1e-8),
         LoggingToFile(join(experiment_dir, 'log.txt'))
     ]
 
