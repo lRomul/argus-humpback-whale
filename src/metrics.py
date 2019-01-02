@@ -141,8 +141,6 @@ class CosMAPatK(Metric):
         train_embeds = np.concatenate(train_embeds, axis=0)
         train_cls_idx = np.concatenate(train_cls_idx, axis=0)
 
-        print(val_embeds.shape, train_embeds.shape)
-
         embeds_distance = cosine_distances(val_embeds, train_embeds)
         preds_idx = embeds_distance.argsort(axis=1)
         preds_idx = preds_idx[:, :self.k]
