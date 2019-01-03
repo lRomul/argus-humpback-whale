@@ -11,7 +11,7 @@ from src.metrics import CosMAPatK
 from src import config
 
 
-experiment_name = 'arcface_resnet50_013'
+experiment_name = 'arcface_resnet50_015'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (96, 304)
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             'arcface': {
                 's': 32.0,
                 'm': 0.5,
-                'easy_margin': True
+                'easy_margin': False
             },
             'embedding_size': 512
         },
