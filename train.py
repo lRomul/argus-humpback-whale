@@ -11,7 +11,7 @@ from src.metrics import CosMAPatK
 from src import config
 
 
-experiment_name = 'arcface_resnet50_010'
+experiment_name = 'arcface_resnet50_011'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (96, 304)
@@ -61,7 +61,7 @@ if __name__ == "__main__":
                                batch_size=batch_size, num_workers=num_workers)
     monitor_metric_name = 'val_' + monitor_metric.name
     callbacks = [
-        MonitorCheckpoint(experiment_dir, monitor=monitor_metric_name),
+        MonitorCheckpoint(experiment_dir, monitor=monitor_metric_name, max_saves=3),
         EarlyStopping(monitor=monitor_metric_name, patience=50),
         ReduceLROnPlateau(monitor=monitor_metric_name, patience=10, factor=0.64, min_lr=1e-8),
         LoggingToFile(join(experiment_dir, 'log.txt'))

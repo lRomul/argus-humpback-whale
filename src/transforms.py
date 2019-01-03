@@ -258,9 +258,9 @@ def get_transforms(train, size):
     if train:
         image_transforms = [
             Scale(size),
-            # UseWithProb(Rotate(2), 0.25),
-            # UseWithProb(HorizontalFlip(), 0.25),
-            # UseWithProb(VerticalFlip(), 0.25),
+            UseWithProb(Rotate(2), 0.25),
+            UseWithProb(HorizontalFlip(), 0.25),
+            UseWithProb(VerticalFlip(), 0.25),
             UseWithProb(Grayscale(), 0.25),
             UseWithProb(GaussNoise(10), 0.2),
             UseWithProb(YCbCrColorAug(), 0.2),

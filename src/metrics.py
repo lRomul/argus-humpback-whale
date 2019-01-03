@@ -142,10 +142,17 @@ class CosMAPatK(Metric):
         train_cls_idx = np.concatenate(train_cls_idx, axis=0)
 
         embeds_distance = cosine_distances(val_embeds, train_embeds)
-        preds_idx = embeds_distance.argsort(axis=1)
-        preds_idx = preds_idx[:, :self.k]
 
-        preds_idx = np.vectorize(lambda x: train_cls_idx[x])(preds_idx)
+        preds_idx = []
+        for arg_pred in embeds_distance.argsort(axis=1):
+            indexes = []
+            for arg in arg_pred:
+                index = train_cls_idx[arg]
+                if index not in indexes:
+                    indexes.append(index)
+                if len(indexes) >= self.k:
+                    break
+            preds_idx.append(indexes)
 
         scores = [apk([a], p, self.k) for a, p in zip(val_cls_idx, preds_idx)]
 
