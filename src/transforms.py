@@ -259,7 +259,7 @@ def get_transforms(train, size):
         image_transforms = [
             Scale(size),
             # UseWithProb(Rotate(2), 0.25),
-            # UseWithProb(HorizontalFlip(), 0.25),
+            UseWithProb(HorizontalFlip(), 0.5),
             # UseWithProb(VerticalFlip(), 0.25),
             UseWithProb(Grayscale(), 0.25),
             UseWithProb(GaussNoise(10), 0.2),
