@@ -18,7 +18,7 @@ image_size = (96, 304)
 num_workers = 8
 batch_size = 128
 balance_coef = 0.0
-train_epoch_size = 20000
+train_epoch_size = 60000
 
 
 if __name__ == "__main__":
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     callbacks = [
         MonitorCheckpoint(experiment_dir, monitor=monitor_metric_name, max_saves=3),
         EarlyStopping(monitor=monitor_metric_name, patience=50),
-        ReduceLROnPlateau(monitor=monitor_metric_name, patience=10, factor=0.64, min_lr=1e-8),
+        ReduceLROnPlateau(monitor=monitor_metric_name, patience=15, factor=0.64, min_lr=1e-8),
         LoggingToFile(join(experiment_dir, 'log.txt'))
     ]
 
