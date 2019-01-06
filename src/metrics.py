@@ -134,7 +134,7 @@ class CosMAPatK(Metric):
                 input = input.to(model.device)
                 target = target.numpy()
 
-                embeds = model.nn_module(input).cpu().numpy()
+                embeds = model.nn_module(input)[0].cpu().numpy()
                 train_embeds.append(embeds)
                 train_cls_idx.append(target)
 

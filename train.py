@@ -6,19 +6,19 @@ from argus.callbacks import MonitorCheckpoint, EarlyStopping,\
 
 from src.transforms import get_transforms
 from src.datasets import WhaleDataset, RandomWhaleDataset
-from src.argus_models import ArcfaceModel
+from src.argus_models import CenterLossModel
 from src.metrics import CosMAPatK
 from src import config
 
 
-experiment_name = 'arcface_resnet50_016'
+experiment_name = 'center_loss_resnet50_001'
 experiment_dir = join(config.EXPERIMENTS_DIR, experiment_name)
 train_val_csv_path = config.TRAIN_VAL_CSV_PATH
 image_size = (96, 304)
 num_workers = 8
 batch_size = 128
 balance_coef = 0.0
-train_epoch_size = 50000
+train_epoch_size = 20000
 
 
 if __name__ == "__main__":
@@ -42,19 +42,18 @@ if __name__ == "__main__":
                 'pretrained': True,
                 'dropout_p': 0.5
             },
-            'arcface': {
-                's': 32.0,
-                'm': 0.5,
-                'easy_margin': False
-            },
             'embedding_size': 512
         },
-        'optimizer': ('Adam', {'lr': 0.0001}),
+        'center_loss': {
+            'lr': 0.01,
+            'weight': 0.5
+        },
+        'optimizer': ('Adam', {'lr': 0.0003}),
         'loss': 'CrossEntropyLoss',
         'device': 'cuda'
     }
     print("Model params:", params)
-    model = ArcfaceModel(params)
+    model = CenterLossModel(params)
 
     train_metric_dataset = WhaleDataset(train_val_csv_path, True, **val_transforms)
     monitor_metric = CosMAPatK(train_metric_dataset, k=5,
@@ -74,4 +73,4 @@ if __name__ == "__main__":
               val_loader=val_loader,
               max_epochs=1000,
               callbacks=callbacks,
-              metrics=['accuracy', monitor_metric])
+              metrics=['accuracy', 'center_loss', monitor_metric])
